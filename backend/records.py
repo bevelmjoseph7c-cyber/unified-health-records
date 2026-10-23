@@ -32,6 +32,9 @@ def row_to_record(row):
         "original_filename": row["original_filename"],
         "import_source": row["import_source"],
         "created_at": row["created_at"],
+        "verified": row["verified_at"] is not None,
+        "verified_by": row["verified_by"],
+        "verified_at": row["verified_at"],
         "extracted_data": extracted,
     }
 

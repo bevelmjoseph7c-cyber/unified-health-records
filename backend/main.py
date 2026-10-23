@@ -95,6 +95,32 @@ def _doctor_exists(conn, doctor_id):
     return conn.execute("SELECT 1 FROM doctors WHERE id = ?", (doctor_id,)).fetchone() is not None
 
 
+def _set_verification(record_id, user, verify):
+    conn = get_conn()
+    try:
+        row = _get_record_row(conn, record_id, user)
+        if verify:
+            if row["extraction_status"] == "failed":
+                raise HTTPException(
+                    status_code=400,
+                    detail="Nothing was extracted from this document, so there is nothing to verify",
+                )
+            conn.execute(
+                "UPDATE records SET verified_by = ?, verified_at = ? WHERE id = ?",
+                (f"{user['name']} ({user['role']})", _now(), record_id),
+            )
+        else:
+            conn.execute(
+                "UPDATE records SET verified_by = NULL, verified_at = NULL WHERE id = ?",
+                (record_id,),
+            )
+        conn.commit()
+        updated = conn.execute("SELECT * FROM records WHERE id = ?", (record_id,)).fetchone()
+        return row_to_record(updated)
+    finally:
+        conn.close()
+
+
 # ------------------------------------------------------------------- routes
 
 @app.get("/health")
@@ -194,6 +220,16 @@ def get_record_document(record_id: int, user=Depends(get_current_user)):
         filename=row["original_filename"],
         content_disposition_type="inline",
     )
+
+
+@app.post("/records/{record_id}/verify")
+def verify_record(record_id: int, user=Depends(get_current_user)):
+    return _set_verification(record_id, user, True)
+
+
+@app.post("/records/{record_id}/unverify")
+def unverify_record(record_id: int, user=Depends(get_current_user)):
+    return _set_verification(record_id, user, False)
 
 
 # ----------------------------------------------------------- access control

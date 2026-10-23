@@ -1,6 +1,10 @@
-   backend/venv/
-   backend/__pycache__/
-   backend/health.db
-   backend/uploads/
-   frontend/node_modules/
-   .env
+@"
+backend/venv/
+__pycache__/
+*.pyc
+backend/health.db
+backend/uploads/
+frontend/node_modules/
+frontend/dist/
+.env
+"@ | Set-Content .gitignore

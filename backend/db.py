@@ -43,6 +43,8 @@ def init_db():
         extraction_status TEXT,
         file_hash TEXT,
         import_source TEXT DEFAULT 'upload',
+        verified_by TEXT,
+        verified_at TEXT,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (patient_id) REFERENCES patients(id)
     );
@@ -82,6 +84,8 @@ def init_db():
     # Upgrade an older health.db that was created before these columns existed
     _add_column_if_missing(conn, "records", "file_hash", "TEXT")
     _add_column_if_missing(conn, "records", "import_source", "TEXT DEFAULT 'upload'")
+    _add_column_if_missing(conn, "records", "verified_by", "TEXT")
+    _add_column_if_missing(conn, "records", "verified_at", "TEXT")
 
     # Same file can't be saved twice for the same patient (enforced by the database)
     conn.execute("""
@@ -98,4 +102,4 @@ def init_db():
         conn.execute("INSERT INTO doctors (id, name) VALUES (2, 'Dr. Vikram Nair')")
 
     conn.commit()
-    conn.close()
+    conn.close()    
