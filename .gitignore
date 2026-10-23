@@ -1,0 +1,6 @@
+   backend/venv/
+   backend/__pycache__/
+   backend/health.db
+   backend/uploads/
+   frontend/node_modules/
+   .env
